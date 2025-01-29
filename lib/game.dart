@@ -89,9 +89,7 @@ class _WordleHomePageState extends State<WordleHomePage> {
             content: Text(message),
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+                onPressed: () => Navigator.of(context).pop(),
                 child: Text("OK"),
               ),
             ],
@@ -150,43 +148,45 @@ class _WordleHomePageState extends State<WordleHomePage> {
       body:
           isLoading
               ? Center(child: CircularProgressIndicator())
-              : Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // Display remaining attempts
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Text(
-                        "Remaining Attempts: ${maxAttempts - guesses.length}",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+              : LayoutBuilder(
+                builder: (context, constraints) {
+                  double widthFactor = constraints.maxWidth / 400;
+                  double fontSize = 18 * widthFactor;
+
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: Text(
+                            "Remaining Attempts: ${maxAttempts - guesses.length}",
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
+                        Expanded(
+                          child: DifficultyTable(
+                            wordLength: wordLength,
+                            guesses: guesses,
+                            getColor: getColor,
+                            widthFactor: widthFactor,
+                          ),
+                        ),
+                        buildInputSection(widthFactor),
+                      ],
                     ),
-                    Expanded(
-                      child: DifficultyTable(
-                        wordLength: wordLength,
-                        guesses: guesses,
-                        getColor: getColor,
-                      ),
-                    ),
-                    buildInputSection(),
-                  ],
-                ),
+                  );
+                },
               ),
-      backgroundColor: const Color.fromARGB(
-        255,
-        27,
-        25,
-        25,
-      ), // Set background to black
+      backgroundColor: const Color.fromARGB(255, 27, 25, 25),
     );
   }
 
-  Widget buildInputSection() {
+  Widget buildInputSection(double widthFactor) {
     return Column(
       children: [
         TextField(
@@ -202,25 +202,28 @@ class _WordleHomePageState extends State<WordleHomePage> {
           decoration: InputDecoration(
             border: OutlineInputBorder(),
             hintText: "Enter your guess",
-            hintStyle: TextStyle(color: Colors.white), // Make hint text white
+            hintStyle: TextStyle(color: Colors.white),
             filled: true,
-            fillColor: Colors.grey[800], // Dark background for the input field
+            fillColor: Colors.grey[800],
           ),
         ),
-        SizedBox(height: 16.0),
+        SizedBox(height: 16.0 * widthFactor),
         ElevatedButton(
           onPressed: gameWon ? null : checkGuess,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: 18 * widthFactor,
+              vertical: 12 * widthFactor,
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.send, size: 16, color: Colors.white),
-                SizedBox(width: 14),
+                Icon(Icons.send, size: 16 * widthFactor, color: Colors.white),
+                SizedBox(width: 14 * widthFactor),
                 Text(
                   "Submit Guess",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16 * widthFactor,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'LibreFranklin',
                     color: Colors.white,
@@ -230,11 +233,11 @@ class _WordleHomePageState extends State<WordleHomePage> {
             ),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green, // Button color
+            backgroundColor: Colors.green,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16), // Rounded corners
+              borderRadius: BorderRadius.circular(16),
             ),
-            elevation: 8, // Shadow effect
+            elevation: 8,
           ),
         ),
       ],
@@ -246,11 +249,13 @@ class DifficultyTable extends StatelessWidget {
   final int wordLength;
   final List<String> guesses;
   final Color Function(String letter, int index, String guess) getColor;
+  final double widthFactor;
 
   const DifficultyTable({
     required this.wordLength,
     required this.guesses,
     required this.getColor,
+    required this.widthFactor,
   });
 
   @override
@@ -263,8 +268,8 @@ class DifficultyTable extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(wordLength, (i) {
             return Container(
-              margin: EdgeInsets.all(4.0),
-              padding: EdgeInsets.all(16.0),
+              margin: EdgeInsets.all(4.0 * widthFactor),
+              padding: EdgeInsets.all(16.0 * widthFactor),
               decoration: BoxDecoration(
                 color: getColor(guess[i], i, guess),
                 borderRadius: BorderRadius.circular(8.0),
@@ -274,7 +279,7 @@ class DifficultyTable extends StatelessWidget {
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 24.0,
+                  fontSize: 24.0 * widthFactor,
                 ),
               ),
             );
