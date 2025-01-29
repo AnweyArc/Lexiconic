@@ -77,6 +77,7 @@ class _GamePreferenceScreenState extends State<GamePreferenceScreen> {
                   fontFamily: 'LibreFranklin',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  letterSpacing: 3,
                 ),
               ),
               SizedBox(height: 20),
