@@ -52,9 +52,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-#  assets:
-#   - assets/images/
-
+  assets:
+    - assets/images/homebackground.jpg
   fonts:
     - family: LibreFranklin
       fonts:
@@ -62,6 +61,7 @@ flutter:
           style: italic
         - asset: assets/fonts/LibreFranklin-VariableFont_wght.ttf
           weight: 700
+
 
 
   # The following line ensures that the Material Icons font is

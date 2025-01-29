@@ -39,13 +39,19 @@ class _HomeScreenState extends State<HomeScreen> {
             fontSize: 32,
             letterSpacing: 3,
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: const Color.fromARGB(255, 23, 0, 31),
       ),
       body: Container(
-        decoration: BoxDecoration(),
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/homebackground.jpg"),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
