@@ -154,6 +154,18 @@ class _WordleHomePageState extends State<WordleHomePage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
+                    // Display remaining attempts
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Text(
+                        "Remaining Attempts: ${maxAttempts - guesses.length}",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                     Expanded(
                       child: DifficultyTable(
                         wordLength: wordLength,
