@@ -148,45 +148,35 @@ class _WordleHomePageState extends State<WordleHomePage> {
       body:
           isLoading
               ? Center(child: CircularProgressIndicator())
-              : LayoutBuilder(
-                builder: (context, constraints) {
-                  double widthFactor = constraints.maxWidth / 400;
-                  double fontSize = 18 * widthFactor;
-
-                  return Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: Text(
-                            "Remaining Attempts: ${maxAttempts - guesses.length}",
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: DifficultyTable(
-                            wordLength: wordLength,
-                            guesses: guesses,
-                            getColor: getColor,
-                            widthFactor: widthFactor,
-                          ),
-                        ),
-                        buildInputSection(widthFactor),
-                      ],
+              : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      "Remaining Attempts: ${maxAttempts - guesses.length}",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                  );
-                },
+                    SizedBox(height: 16),
+                    Expanded(
+                      child: DifficultyTable(
+                        wordLength: wordLength,
+                        guesses: guesses,
+                        getColor: getColor,
+                      ),
+                    ),
+                    buildInputSection(),
+                  ],
+                ),
               ),
       backgroundColor: const Color.fromARGB(255, 27, 25, 25),
     );
   }
 
-  Widget buildInputSection(double widthFactor) {
+  Widget buildInputSection() {
     return Column(
       children: [
         TextField(
@@ -207,30 +197,23 @@ class _WordleHomePageState extends State<WordleHomePage> {
             fillColor: Colors.grey[800],
           ),
         ),
-        SizedBox(height: 16.0 * widthFactor),
+        SizedBox(height: 16.0),
         ElevatedButton(
           onPressed: gameWon ? null : checkGuess,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 18 * widthFactor,
-              vertical: 12 * widthFactor,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.send, size: 16 * widthFactor, color: Colors.white),
-                SizedBox(width: 14 * widthFactor),
-                Text(
-                  "Submit Guess",
-                  style: TextStyle(
-                    fontSize: 16 * widthFactor,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'LibreFranklin',
-                    color: Colors.white,
-                  ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.send, color: Colors.white),
+              SizedBox(width: 10),
+              Text(
+                "Submit Guess",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'LibreFranklin',
+                  color: Colors.white,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
@@ -249,13 +232,11 @@ class DifficultyTable extends StatelessWidget {
   final int wordLength;
   final List<String> guesses;
   final Color Function(String letter, int index, String guess) getColor;
-  final double widthFactor;
 
   const DifficultyTable({
     required this.wordLength,
     required this.guesses,
     required this.getColor,
-    required this.widthFactor,
   });
 
   @override
@@ -264,26 +245,29 @@ class DifficultyTable extends StatelessWidget {
       itemCount: guesses.length,
       itemBuilder: (context, index) {
         String guess = guesses[index];
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(wordLength, (i) {
-            return Container(
-              margin: EdgeInsets.all(4.0 * widthFactor),
-              padding: EdgeInsets.all(16.0 * widthFactor),
-              decoration: BoxDecoration(
-                color: getColor(guess[i], i, guess),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Text(
-                guess[i],
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24.0 * widthFactor,
+        return FittedBox(
+          fit: BoxFit.contain,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(wordLength, (i) {
+              return Container(
+                margin: EdgeInsets.all(4.0),
+                padding: EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: getColor(guess[i], i, guess),
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-              ),
-            );
-          }),
+                child: Text(
+                  guess[i],
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24.0,
+                  ),
+                ),
+              );
+            }),
+          ),
         );
       },
     );
