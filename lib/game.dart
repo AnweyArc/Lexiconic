@@ -84,37 +84,35 @@ class _WordleHomePageState extends State<WordleHomePage> {
   void showAlertDialog(String message) {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text("Notice"),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text("OK"),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text("Notice"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text("OK"),
           ),
+        ],
+      ),
     );
   }
 
   void showEndDialog(String message) {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text("Game Over"),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  resetGame();
-                },
-                child: Text("Play Again"),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text("Game Over"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              resetGame();
+            },
+            child: Text("Play Again"),
           ),
+        ],
+      ),
     );
   }
 
@@ -162,19 +160,30 @@ class _WordleHomePageState extends State<WordleHomePage> {
     // Check if the key has been used in any guess
     bool hasBeenUsed = guesses.any((guess) => guess.contains(key));
 
-    // If the key has been used and is not in the target word, mark it as red
-    if (hasBeenUsed && !targetWord.contains(key)) {
-      return Colors.red;
+    // If the key has not been used, return grey
+    if (!hasBeenUsed) return Colors.grey;
+
+    // Check if the key is in the correct position in any guess
+    for (String guess in guesses) {
+      for (int i = 0; i < guess.length; i++) {
+        if (guess[i] == key && targetWord[i] == key) {
+          return Colors.green; // Correct position
+        }
+      }
     }
 
-    // Otherwise, return grey (default color)
-    return Colors.grey;
+    // Check if the key is in the word but not in the correct position
+    if (targetWord.contains(key)) {
+      return Colors.orange; // Correct letter, wrong position
+    }
+
+    // If the key has been used and is not in the word, return red
+    return Colors.red;
   }
 
   bool isKeyDisabled(String key) {
     // Disable the key only if it has been used and is not in the target word
-    return guesses.any((guess) => guess.contains(key)) &&
-        !targetWord.contains(key);
+    return guesses.any((guess) => guess.contains(key)) && !targetWord.contains(key);
   }
 
   @override
@@ -182,41 +191,39 @@ class _WordleHomePageState extends State<WordleHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Wordle Game (${widget.difficulty.capitalize()})"),
-        backgroundColor:
-            widget.difficulty == "easy"
-                ? Colors.green
-                : widget.difficulty == "hard"
+        backgroundColor: widget.difficulty == "easy"
+            ? Colors.green
+            : widget.difficulty == "hard"
                 ? Colors.orange
                 : Colors.red,
       ),
-      body:
-          isLoading
-              ? Center(child: CircularProgressIndicator())
-              : Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text(
-                      "Remaining Attempts: ${maxAttempts - guesses.length}",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(
+                    "Remaining Attempts: ${maxAttempts - guesses.length}",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
-                    SizedBox(height: 16),
-                    Expanded(
-                      child: DifficultyTable(
-                        wordLength: wordLength,
-                        guesses: guesses,
-                        getColor: getColor,
-                      ),
+                  ),
+                  SizedBox(height: 16),
+                  Expanded(
+                    child: DifficultyTable(
+                      wordLength: wordLength,
+                      guesses: guesses,
+                      getColor: getColor,
                     ),
-                    buildInputSection(),
-                    if (showKeyboard) buildCustomKeyboard(),
-                  ],
-                ),
+                  ),
+                  buildInputSection(),
+                  if (showKeyboard) buildCustomKeyboard(),
+                ],
               ),
+            ),
       backgroundColor: const Color.fromARGB(255, 27, 25, 25),
     );
   }
@@ -291,29 +298,23 @@ class _WordleHomePageState extends State<WordleHomePage> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children:
-                ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']
-                    .map(
-                      (key) => KeyboardKey(
-                        keyLabel: key,
-                        onKeyPressed: isKeyDisabled(key) ? null : onKeyPressed,
-                        color: getKeyColor(key),
-                      ),
-                    )
-                    .toList(),
+            children: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']
+                .map((key) => KeyboardKey(
+                      keyLabel: key,
+                      onKeyPressed: isKeyDisabled(key) ? null : onKeyPressed,
+                      color: getKeyColor(key),
+                    ))
+                .toList(),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children:
-                ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L']
-                    .map(
-                      (key) => KeyboardKey(
-                        keyLabel: key,
-                        onKeyPressed: isKeyDisabled(key) ? null : onKeyPressed,
-                        color: getKeyColor(key),
-                      ),
-                    )
-                    .toList(),
+            children: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L']
+                .map((key) => KeyboardKey(
+                      keyLabel: key,
+                      onKeyPressed: isKeyDisabled(key) ? null : onKeyPressed,
+                      color: getKeyColor(key),
+                    ))
+                .toList(),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -323,13 +324,11 @@ class _WordleHomePageState extends State<WordleHomePage> {
                 onKeyPressed: (_) => onBackspacePressed(),
                 color: Colors.grey,
               ),
-              ...['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map(
-                (key) => KeyboardKey(
-                  keyLabel: key,
-                  onKeyPressed: isKeyDisabled(key) ? null : onKeyPressed,
-                  color: getKeyColor(key),
-                ),
-              ),
+              ...['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map((key) => KeyboardKey(
+                    keyLabel: key,
+                    onKeyPressed: isKeyDisabled(key) ? null : onKeyPressed,
+                    color: getKeyColor(key),
+                  )),
               KeyboardKey(
                 keyLabel: 'Enter',
                 onKeyPressed: (_) => checkGuess(),
