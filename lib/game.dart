@@ -301,9 +301,9 @@ class _WordleHomePageState extends State<WordleHomePage> {
     // Adjust these values to make the keys smaller or larger
     final double keyWidth =
         screenWidth /
-        12; // Smaller keys (increase divisor to make them smaller)
+        20; // Smaller keys (increase divisor to make them smaller)
     final double keyHeight =
-        keyWidth * 1.1; // Slightly taller than wide (adjust multiplier)
+        keyWidth * 1.8; // Slightly taller than wide (adjust multiplier)
 
     return Container(
       padding: EdgeInsets.all(8.0),
