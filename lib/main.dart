@@ -1,17 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'gamepreference.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  @override
+  void initState() {
+    super.initState();
+    playBackgroundMusic();
+  }
+
+  Future<void> playBackgroundMusic() async {
+    try {
+      print("Loading audio...");
+      await _audioPlayer.setAudioSource(
+        AudioSource.asset('assets/audio/BackgroundMusic.mp3'),
+      );
+
+      _audioPlayer.setLoopMode(LoopMode.all);
+      _audioPlayer.setVolume(1.0);
+
+      await _audioPlayer.play();
+      print("Playing audio...");
+    } catch (e) {
+      print("Error loading audio: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(), // Set HomeScreen as the initial screen
-    );
+    return MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen());
   }
 }
 
@@ -35,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(
           'Lexiconic',
           style: TextStyle(
-            fontFamily: 'LibreFranklin', // Apply custom font to the title
+            fontFamily: 'LibreFranklin',
             fontSize: 32,
             letterSpacing: 3,
             fontWeight: FontWeight.bold,
@@ -60,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 "Play",
                 Icons.play_arrow,
-                Colors.green, // Play button color
+                Colors.green,
                 () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -72,28 +106,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 "Achievements",
                 Icons.emoji_events,
-                Colors.orange, // Achievements button color
-                () {
-                  // Implement Achievements screen navigation
-                },
+                Colors.orange,
+                () {},
               ),
               _buildMenuButton(
                 context,
                 "Settings",
                 Icons.settings,
-                Colors.blue, // Settings button color
-                () {
-                  // Implement Settings screen navigation
-                },
+                Colors.blue,
+                () {},
               ),
               _buildMenuButton(
                 context,
                 "Dictionary",
                 Icons.book,
-                Colors.purple, // Dictionary button color
-                () {
-                  // Implement Dictionary screen navigation
-                },
+                Colors.purple,
+                () {},
               ),
             ],
           ),
@@ -112,10 +140,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
       child: MouseRegion(
-        onEnter: (_) => _onHover(true, text), // On hover, scale up
-        onExit: (_) => _onHover(false, text), // On exit, reset scale
+        onEnter: (_) => _onHover(true, text),
+        onExit: (_) => _onHover(false, text),
         child: AnimatedScale(
-          scale: _scaleMap[text]!, // Use the scale from the map
+          scale: _scaleMap[text]!,
           duration: Duration(milliseconds: 200),
           curve: Curves.easeInOut,
           child: InkWell(
@@ -159,14 +187,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Method to update scale for a specific button when hovered
   void _onHover(bool isHovered, String buttonText) {
     setState(() {
-      if (isHovered) {
-        _scaleMap[buttonText] = 1.1; // Scale up the hovered button
-      } else {
-        _scaleMap[buttonText] = 1.0; // Reset scale for the non-hovered button
-      }
+      _scaleMap[buttonText] = isHovered ? 1.1 : 1.0;
     });
   }
 }
