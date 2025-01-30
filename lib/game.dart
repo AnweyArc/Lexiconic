@@ -20,6 +20,7 @@ class _WordleHomePageState extends State<WordleHomePage> {
   late int maxAttempts;
   bool gameWon = false;
   bool isLoading = true;
+  bool showKeyboard = false;
 
   TextEditingController _controller = TextEditingController();
 
@@ -129,8 +130,51 @@ class _WordleHomePageState extends State<WordleHomePage> {
 
   Color getColor(String letter, int index, String guess) {
     if (targetWord[index] == letter) return Colors.green;
-    if (targetWord.contains(letter)) return Colors.yellow;
+    if (targetWord.contains(letter)) return Colors.orange;
     return Colors.grey;
+  }
+
+  void toggleKeyboard() {
+    setState(() {
+      showKeyboard = !showKeyboard;
+    });
+  }
+
+  void onKeyPressed(String key) {
+    if (currentGuess.length < wordLength) {
+      setState(() {
+        currentGuess += key;
+        _controller.text = currentGuess;
+      });
+    }
+  }
+
+  void onBackspacePressed() {
+    if (currentGuess.isNotEmpty) {
+      setState(() {
+        currentGuess = currentGuess.substring(0, currentGuess.length - 1);
+        _controller.text = currentGuess;
+      });
+    }
+  }
+
+  Color getKeyColor(String key) {
+    // Check if the key has been used in any guess
+    bool hasBeenUsed = guesses.any((guess) => guess.contains(key));
+
+    // If the key has been used and is not in the target word, mark it as red
+    if (hasBeenUsed && !targetWord.contains(key)) {
+      return Colors.red;
+    }
+
+    // Otherwise, return grey (default color)
+    return Colors.grey;
+  }
+
+  bool isKeyDisabled(String key) {
+    // Disable the key only if it has been used and is not in the target word
+    return guesses.any((guess) => guess.contains(key)) &&
+        !targetWord.contains(key);
   }
 
   @override
@@ -169,6 +213,7 @@ class _WordleHomePageState extends State<WordleHomePage> {
                       ),
                     ),
                     buildInputSection(),
+                    if (showKeyboard) buildCustomKeyboard(),
                   ],
                 ),
               ),
@@ -179,23 +224,34 @@ class _WordleHomePageState extends State<WordleHomePage> {
   Widget buildInputSection() {
     return Column(
       children: [
-        TextField(
-          controller: _controller,
-          maxLength: wordLength,
-          enabled: !gameWon,
-          onChanged: (value) {
-            setState(() {
-              currentGuess = value.toUpperCase();
-            });
-          },
-          onSubmitted: (_) => checkGuess(),
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: "Enter your guess",
-            hintStyle: TextStyle(color: Colors.white),
-            filled: true,
-            fillColor: Colors.grey[800],
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                maxLength: wordLength,
+                enabled: !gameWon,
+                onChanged: (value) {
+                  setState(() {
+                    currentGuess = value.toUpperCase();
+                  });
+                },
+                onSubmitted: (_) => checkGuess(),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "Enter your guess",
+                  hintStyle: TextStyle(color: Colors.white),
+                  filled: true,
+                  fillColor: Colors.grey[800],
+                ),
+              ),
+            ),
+            SizedBox(width: 8.0),
+            IconButton(
+              icon: Icon(Icons.keyboard, color: Colors.white),
+              onPressed: toggleKeyboard,
+            ),
+          ],
         ),
         SizedBox(height: 16.0),
         ElevatedButton(
@@ -224,6 +280,104 @@ class _WordleHomePageState extends State<WordleHomePage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget buildCustomKeyboard() {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      color: Colors.grey[900],
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children:
+                ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']
+                    .map(
+                      (key) => KeyboardKey(
+                        keyLabel: key,
+                        onKeyPressed: isKeyDisabled(key) ? null : onKeyPressed,
+                        color: getKeyColor(key),
+                      ),
+                    )
+                    .toList(),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children:
+                ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L']
+                    .map(
+                      (key) => KeyboardKey(
+                        keyLabel: key,
+                        onKeyPressed: isKeyDisabled(key) ? null : onKeyPressed,
+                        color: getKeyColor(key),
+                      ),
+                    )
+                    .toList(),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              KeyboardKey(
+                keyLabel: '⌫',
+                onKeyPressed: (_) => onBackspacePressed(),
+                color: Colors.grey,
+              ),
+              ...['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map(
+                (key) => KeyboardKey(
+                  keyLabel: key,
+                  onKeyPressed: isKeyDisabled(key) ? null : onKeyPressed,
+                  color: getKeyColor(key),
+                ),
+              ),
+              KeyboardKey(
+                keyLabel: 'Enter',
+                onKeyPressed: (_) => checkGuess(),
+                color: Colors.grey,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class KeyboardKey extends StatelessWidget {
+  final String keyLabel;
+  final Function(String)? onKeyPressed;
+  final Color color;
+
+  const KeyboardKey({
+    required this.keyLabel,
+    required this.onKeyPressed,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Material(
+        color: color,
+        borderRadius: BorderRadius.circular(4.0),
+        child: InkWell(
+          onTap: onKeyPressed == null ? null : () => onKeyPressed!(keyLabel),
+          child: Container(
+            width: keyLabel == 'Enter' || keyLabel == '⌫' ? 64 : 32,
+            height: 48,
+            alignment: Alignment.center,
+            child: Text(
+              keyLabel,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
