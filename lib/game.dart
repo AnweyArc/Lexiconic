@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'fetchdata.dart';
+import 'data_info.dart';
 
 class WordleHomePage extends StatefulWidget {
   final String difficulty;
@@ -72,6 +73,7 @@ class _WordleHomePageState extends State<WordleHomePage> {
       guesses.add(currentGuess);
       if (currentGuess == targetWord) {
         gameWon = true;
+        successfullyGuessedWords.add(targetWord); // Add to global list
         showEndDialog("Congratulations! You guessed the word!");
       } else if (guesses.length >= maxAttempts) {
         showEndDialog("Game Over! The word was $targetWord.");

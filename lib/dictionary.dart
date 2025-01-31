@@ -1,4 +1,6 @@
+// dictionary.dart
 import 'package:flutter/material.dart';
+import 'data_info.dart'; // Import the shared data file
 
 class DictionaryScreen extends StatelessWidget {
   @override
@@ -25,16 +27,21 @@ class DictionaryScreen extends StatelessWidget {
             fit: BoxFit.cover,
           ),
         ),
-        child: Center(
-          child: Text(
-            'Dictionary Screen',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'LibreFranklin',
-              color: Colors.white,
-            ),
-          ),
+        child: ListView.builder(
+          itemCount: successfullyGuessedWords.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(
+                successfullyGuessedWords[index],
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'LibreFranklin',
+                  color: Colors.white,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
