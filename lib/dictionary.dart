@@ -1,4 +1,3 @@
-// dictionary.dart
 import 'package:flutter/material.dart';
 import 'data_info.dart'; // Import the shared data file
 
@@ -14,20 +13,23 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize filteredWords with the 5 most recent guessed words
-    filteredWords =
-        successfullyGuessedWords
+    // Load the guessed words when the screen is opened
+    loadGuessedWords().then((_) {
+      setState(() {
+        // Initialize filteredWords with the 5 most recent guessed words
+        filteredWords = successfullyGuessedWords
             .take(5)
             .toList(); // Only show the 5 most recent words
+      });
+    });
   }
 
   void _filterWords(String query) {
     setState(() {
-      filteredWords =
-          successfullyGuessedWords
-              .where((word) => word.toLowerCase().contains(query.toLowerCase()))
-              .take(5) // Limit to 5 results
-              .toList();
+      filteredWords = successfullyGuessedWords
+          .where((word) => word.toLowerCase().contains(query.toLowerCase()))
+          .take(5) // Limit to 5 results
+          .toList();
     });
   }
 
@@ -73,16 +75,15 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                     borderSide: BorderSide.none,
                   ),
                   prefixIcon: Icon(Icons.search, color: Colors.white70),
-                  suffixIcon:
-                      _searchController.text.isNotEmpty
-                          ? IconButton(
-                            icon: Icon(Icons.clear, color: Colors.white70),
-                            onPressed: () {
-                              _searchController.clear();
-                              _filterWords('');
-                            },
-                          )
-                          : null,
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear, color: Colors.white70),
+                          onPressed: () {
+                            _searchController.clear();
+                            _filterWords('');
+                          },
+                        )
+                      : null,
                 ),
                 style: TextStyle(color: Colors.white),
               ),
