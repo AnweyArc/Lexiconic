@@ -180,7 +180,7 @@ class _WordleHomePageState extends State<WordleHomePage> {
     }
 
     // If the key has been used and is not in the word, return red
-    return Colors.red;
+    return Colors.black;
   }
 
   bool isKeyDisabled(String key) {
@@ -193,7 +193,16 @@ class _WordleHomePageState extends State<WordleHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Wordle Game (${widget.difficulty.capitalize()})"),
+        title: Text(
+          "Wordle Game (${widget.difficulty.capitalize()})",
+          style: TextStyle(
+            fontFamily: 'LibreFranklin',
+            fontSize: 24,
+            letterSpacing: 2,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         backgroundColor:
             widget.difficulty == "easy"
                 ? Colors.green
@@ -301,7 +310,7 @@ class _WordleHomePageState extends State<WordleHomePage> {
     // Adjust these values to make the keys smaller or larger
     final double keyWidth =
         screenWidth /
-        20; // Smaller keys (increase divisor to make them smaller)
+        16; // Smaller keys (increase divisor to make them smaller)
     final double keyHeight =
         keyWidth * 1.8; // Slightly taller than wide (adjust multiplier)
 

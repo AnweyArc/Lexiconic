@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'gamepreference.dart';
+import 'dictionary.dart'; // Import the dictionary.dart file
 
 void main() {
   runApp(MyApp());
@@ -121,7 +122,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 "Dictionary",
                 Icons.book,
                 Colors.purple,
-                () {},
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DictionaryScreen(),
+                  ),
+                ),
               ),
             ],
           ),
