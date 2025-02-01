@@ -4,6 +4,7 @@ import 'gamepreference.dart';
 import 'dictionary.dart'; // Import the dictionary.dart file
 import 'settings.dart'; // Import the settings.dart file
 import 'package:shared_preferences/shared_preferences.dart';
+import 'achievements.dart';
 
 void main() {
   runApp(MyApp());
@@ -125,12 +126,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               _buildMenuButton(
-                context,
-                "Achievements",
-                Icons.emoji_events,
-                Colors.orange,
-                () {},
-              ),
+  context,
+  "Achievements",
+  Icons.emoji_events,
+  Colors.orange,
+  () => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => AchievementsScreen()),
+  ),
+),
               _buildMenuButton(
                 context,
                 "Settings",
