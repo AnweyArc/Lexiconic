@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'data_info.dart'; // Import the shared data file
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'data_info.dart';
 
 class DictionaryScreen extends StatefulWidget {
   @override
@@ -13,24 +15,106 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
   @override
   void initState() {
     super.initState();
-    // Load the guessed words when the screen is opened
     loadGuessedWords().then((_) {
       setState(() {
-        // Initialize filteredWords with the 5 most recent guessed words
-        filteredWords = successfullyGuessedWords
-            .take(5)
-            .toList(); // Only show the 5 most recent words
+        filteredWords = successfullyGuessedWords.take(5).toList();
       });
     });
   }
 
   void _filterWords(String query) {
     setState(() {
-      filteredWords = successfullyGuessedWords
-          .where((word) => word.toLowerCase().contains(query.toLowerCase()))
-          .take(5) // Limit to 5 results
-          .toList();
+      filteredWords =
+          successfullyGuessedWords
+              .where((word) => word.toLowerCase().contains(query.toLowerCase()))
+              .take(5)
+              .toList();
     });
+  }
+
+  Future<Map<String, dynamic>> fetchWordDetails(String word) async {
+    final response = await http.get(
+      Uri.parse('https://api.dictionaryapi.dev/api/v2/entries/en/$word'),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.first;
+    } else {
+      throw Exception('Failed to load word details');
+    }
+  }
+
+  void _showWordDetails(String word) async {
+    try {
+      Map<String, dynamic> wordData = await fetchWordDetails(word);
+      List<dynamic> meanings = wordData['meanings'];
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.grey[900],
+            title: Text(
+              word,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children:
+                    meanings.map((meaning) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              meaning['partOfSpeech'] ?? '',
+                              style: TextStyle(
+                                color: Colors.blueAccent,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            ...meaning['definitions'].map<Widget>((definition) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                ),
+                                child: Text(
+                                  "- ${definition['definition']}",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: Text("Close", style: TextStyle(color: Colors.white)),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to fetch details for $word")),
+      );
+    }
   }
 
   @override
@@ -59,7 +143,6 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
         ),
         child: Column(
           children: [
-            // Search Bar
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: TextField(
@@ -75,20 +158,20 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                     borderSide: BorderSide.none,
                   ),
                   prefixIcon: Icon(Icons.search, color: Colors.white70),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(Icons.clear, color: Colors.white70),
-                          onPressed: () {
-                            _searchController.clear();
-                            _filterWords('');
-                          },
-                        )
-                      : null,
+                  suffixIcon:
+                      _searchController.text.isNotEmpty
+                          ? IconButton(
+                            icon: Icon(Icons.clear, color: Colors.white70),
+                            onPressed: () {
+                              _searchController.clear();
+                              _filterWords('');
+                            },
+                          )
+                          : null,
                 ),
                 style: TextStyle(color: Colors.white),
               ),
             ),
-            // List of Words
             Expanded(
               child: ListView.builder(
                 itemCount: filteredWords.length,
@@ -113,9 +196,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                         Icons.arrow_forward_ios,
                         color: Colors.white70,
                       ),
-                      onTap: () {
-                        // Add functionality when a word is tapped
-                      },
+                      onTap: () => _showWordDetails(filteredWords[index]),
                     ),
                   );
                 },

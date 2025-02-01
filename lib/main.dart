@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'gamepreference.dart';
 import 'dictionary.dart'; // Import the dictionary.dart file
+import 'settings.dart'; // Import the settings.dart file
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,11 +16,23 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isBackgroundMusicEnabled = true;
 
   @override
   void initState() {
     super.initState();
-    playBackgroundMusic();
+    _loadSettings();
+  }
+
+  // Load the background music setting from SharedPreferences
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isBackgroundMusicEnabled = prefs.getBool('backgroundMusic') ?? true;
+    });
+    if (_isBackgroundMusicEnabled) {
+      playBackgroundMusic();
+    }
   }
 
   Future<void> playBackgroundMusic() async {
@@ -46,11 +60,18 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HomeScreen(audioPlayer: _audioPlayer),
+    );
   }
 }
 
 class HomeScreen extends StatefulWidget {
+  final AudioPlayer audioPlayer;
+
+  HomeScreen({required this.audioPlayer});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -115,7 +136,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 "Settings",
                 Icons.settings,
                 Colors.blue,
-                () {},
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            SettingsScreen(audioPlayer: widget.audioPlayer),
+                  ),
+                ),
               ),
               _buildMenuButton(
                 context,
@@ -124,9 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Colors.purple,
                 () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => DictionaryScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => DictionaryScreen()),
                 ),
               ),
             ],
