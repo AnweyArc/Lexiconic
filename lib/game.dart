@@ -317,9 +317,9 @@ class _WordleHomePageState extends State<WordleHomePage> {
     // Adjust these values to make the keys smaller or larger
     final double keyWidth =
         screenWidth /
-        16; // Smaller keys (increase divisor to make them smaller)
+        18; // Smaller keys (increase divisor to make them smaller)
     final double keyHeight =
-        keyWidth * 1.8; // Slightly taller than wide (adjust multiplier)
+        keyWidth * 2; // Slightly taller than wide (adjust multiplier)
 
     return Container(
       padding: EdgeInsets.all(8.0),
@@ -360,12 +360,10 @@ class _WordleHomePageState extends State<WordleHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               KeyboardKey(
-                keyLabel: '⌫',
-                onKeyPressed: (_) => onBackspacePressed(),
+                keyLabel: 'Enter',
+                onKeyPressed: (_) => checkGuess(),
                 color: Colors.grey,
-                width:
-                    keyWidth *
-                    1.4, // Adjust this multiplier for backspace width
+                width: keyWidth * 1.7, // Adjust this multiplier for enter width
                 height: keyHeight,
               ),
               ...['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map(
@@ -378,10 +376,12 @@ class _WordleHomePageState extends State<WordleHomePage> {
                 ),
               ),
               KeyboardKey(
-                keyLabel: 'Enter',
-                onKeyPressed: (_) => checkGuess(),
+                keyLabel: '⌫',
+                onKeyPressed: (_) => onBackspacePressed(),
                 color: Colors.grey,
-                width: keyWidth * 1.2, // Adjust this multiplier for enter width
+                width:
+                    keyWidth *
+                    1.4, // Adjust this multiplier for backspace width
                 height: keyHeight,
               ),
             ],
