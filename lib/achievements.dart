@@ -9,7 +9,7 @@ class AchievementsScreen extends StatefulWidget {
 class _AchievementsScreenState extends State<AchievementsScreen> {
   Map<String, List<Map<String, dynamic>>> achievements = {
     "Easy": [
-      {"title": "Nice Guessing!", "threshold": 15, "unlocked": false},
+      {"title": "Nice Guessing!", "threshold": 1, "unlocked": false},
       {
         "title": "Woah, you're pretty good at this!",
         "threshold": 50,
@@ -31,7 +31,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       {"title": "???", "threshold": 500, "unlocked": false},
     ],
     "Nightmare": [
-      {"title": "Nice Guessing!", "threshold": 15, "unlocked": false},
+      {"title": "Nice Guessing!", "threshold": 1, "unlocked": false},
       {
         "title": "Woah, you're pretty good at this!",
         "threshold": 50,
@@ -55,11 +55,35 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       achievements.forEach((category, achievementList) {
         int guessedWords = prefs.getInt('${category}_guessedWords') ?? 0;
         for (var achievement in achievementList) {
-          if (guessedWords >= achievement["threshold"]) {
-            achievement["unlocked"] = true;
-          }
+          achievement["unlocked"] =
+              prefs.getBool('${category}_${achievement["title"]}') ??
+              (guessedWords >= achievement["threshold"]);
         }
       });
+    });
+  }
+
+  Future<void> _saveAchievements() async {
+    final prefs = await SharedPreferences.getInstance();
+    achievements.forEach((category, achievementList) {
+      for (var achievement in achievementList) {
+        prefs.setBool(
+          '${category}_${achievement["title"]}',
+          achievement["unlocked"],
+        );
+      }
+    });
+  }
+
+  void _updateAchievements(String category, int guessedWords) {
+    setState(() {
+      for (var achievement in achievements[category]!) {
+        if (guessedWords >= achievement["threshold"] &&
+            !achievement["unlocked"]) {
+          achievement["unlocked"] = true;
+        }
+      }
+      _saveAchievements();
     });
   }
 
@@ -83,9 +107,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         padding: EdgeInsets.all(16.0),
         children:
             achievements.entries.map((entry) {
-              String category = entry.key;
-              List<Map<String, dynamic>> achievementList = entry.value;
-              return _buildAchievementCategory(category, achievementList);
+              return _buildAchievementCategory(entry.key, entry.value);
             }).toList(),
       ),
     );
@@ -117,6 +139,15 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                   color: achievement["unlocked"] ? Colors.green : Colors.grey,
                 ),
                 title: Text(achievement["title"]),
+                subtitle: LinearProgressIndicator(
+                  value: achievement["unlocked"] ? 1.0 : 0.0,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                ),
+                trailing: Text(
+                  "${achievement["threshold"]} Guessed",
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
               );
             }).toList(),
       ),
