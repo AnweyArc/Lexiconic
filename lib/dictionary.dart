@@ -106,66 +106,168 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
       showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            backgroundColor: Colors.grey[900],
-            title: Text(
-              word,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.all(20),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color.fromARGB(255, 23, 0, 31),
+                    Color.fromARGB(255, 54, 0, 73),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
               ),
-            ),
-            content: SingleChildScrollView(
+              padding: EdgeInsets.all(24),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children:
-                    meanings.map((meaning) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              meaning['partOfSpeech'] ?? '',
-                              style: TextStyle(
-                                color: Colors.blueAccent,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            ...meaning['definitions'].map<Widget>((definition) {
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        word.toUpperCase(),
+                        style: TextStyle(
+                          fontFamily: 'LibreFranklin',
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color: Colors.white70),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                  Divider(color: Colors.white24, height: 32),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.6,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children:
+                            meanings.map((meaning) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                ),
-                                child: Text(
-                                  "- ${definition['definition']}",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
+                                padding: const EdgeInsets.only(bottom: 20.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blueAccent.withOpacity(
+                                          0.2,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        (meaning['partOfSpeech'] ?? '')
+                                            .toUpperCase(),
+                                        style: TextStyle(
+                                          fontFamily: 'LibreFranklin',
+                                          color: Colors.blueAccent,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 12),
+                                    ...meaning['definitions'].map<Widget>((
+                                      definition,
+                                    ) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 12.0,
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 4.0,
+                                                right: 8.0,
+                                              ),
+                                              child: Icon(
+                                                Icons.arrow_forward_ios_rounded,
+                                                size: 14,
+                                                color: Colors.white70,
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                definition['definition'],
+                                                style: TextStyle(
+                                                  fontFamily: 'LibreFranklin',
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  height: 1.4,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ],
                                 ),
                               );
                             }).toList(),
-                          ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurpleAccent,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 14,
                         ),
-                      );
-                    }).toList(),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        'CLOSE',
+                        style: TextStyle(
+                          fontFamily: 'LibreFranklin',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            actions: [
-              TextButton(
-                child: Text("Close", style: TextStyle(color: Colors.white)),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
           );
         },
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to fetch details for $word")),
+        SnackBar(
+          content: Text(
+            "Failed to fetch details for $word",
+            style: TextStyle(fontFamily: 'LibreFranklin'),
+          ),
+          backgroundColor: Colors.red.shade800,
+        ),
       );
     }
   }
