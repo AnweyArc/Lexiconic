@@ -198,54 +198,112 @@ class _WordleHomePageState extends State<WordleHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final Color difficultyColor =
+        widget.difficulty == "easy"
+            ? Colors.green.shade800
+            : widget.difficulty == "hard"
+            ? Colors.orange.shade800
+            : Colors.red.shade800;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Wordle Game (${widget.difficulty.capitalize()})",
+          "LEXICONIC - ${widget.difficulty.toUpperCase()} MODE",
           style: TextStyle(
             fontFamily: 'LibreFranklin',
-            fontSize: 24,
-            letterSpacing: 2,
+            fontSize: 20,
+            letterSpacing: 2.5,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
         ),
-        backgroundColor:
-            widget.difficulty == "easy"
-                ? Colors.green
-                : widget.difficulty == "hard"
-                ? Colors.orange
-                : Colors.red,
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                difficultyColor.withOpacity(0.9),
+                difficultyColor.withOpacity(0.7),
+              ],
+            ),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+        ),
       ),
       body:
           isLoading
-              ? Center(child: CircularProgressIndicator())
-              : Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text(
-                      "Remaining Attempts: ${maxAttempts - guesses.length}",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+              ? Center(
+                child: CircularProgressIndicator(
+                  color: Colors.deepPurpleAccent,
+                  strokeWidth: 3,
+                ),
+              )
+              : Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color.fromARGB(255, 23, 0, 31),
+                      Color.fromARGB(255, 54, 0, 73),
+                    ],
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 20,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 20,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          "ATTEMPTS REMAINING: ${maxAttempts - guesses.length}",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'LibreFranklin',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white70,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 16),
-                    Expanded(
-                      child: DifficultyTable(
-                        wordLength: wordLength,
-                        guesses: guesses,
-                        getColor: getColor,
+                      SizedBox(height: 24),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: DifficultyTable(
+                            wordLength: wordLength,
+                            guesses: guesses,
+                            getColor: getColor,
+                          ),
+                        ),
                       ),
-                    ),
-                    buildInputSection(),
-                    if (showKeyboard) buildCustomKeyboard(context),
-                  ],
+                      SizedBox(height: 24),
+                      buildInputSection(),
+                      if (showKeyboard) buildCustomKeyboard(context),
+                    ],
+                  ),
                 ),
               ),
-      backgroundColor: const Color.fromARGB(255, 27, 25, 25),
     );
   }
 
