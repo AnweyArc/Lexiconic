@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'data_info.dart';
 
 class AchievementsScreen extends StatefulWidget {
   @override
@@ -9,7 +10,7 @@ class AchievementsScreen extends StatefulWidget {
 class _AchievementsScreenState extends State<AchievementsScreen> {
   Map<String, List<Map<String, dynamic>>> achievements = {
     "Easy": [
-      {"title": "Nice Guessing!", "threshold": 1, "unlocked": false},
+      {"title": "Nice Guessing!", "threshold": 5, "unlocked": false},
       {
         "title": "Woah, you're pretty good at this!",
         "threshold": 50,
@@ -19,8 +20,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       {"title": "You're Getting There!", "threshold": 250, "unlocked": false},
       {"title": "???", "threshold": 500, "unlocked": false},
     ],
-    "Normal": [
-      {"title": "Nice Guessing!", "threshold": 15, "unlocked": false},
+    "Hard": [
+      {"title": "Nice Guessing!", "threshold": 5, "unlocked": false},
       {
         "title": "Woah, you're pretty good at this!",
         "threshold": 50,
@@ -31,7 +32,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       {"title": "???", "threshold": 500, "unlocked": false},
     ],
     "Nightmare": [
-      {"title": "Nice Guessing!", "threshold": 1, "unlocked": false},
+      {"title": "Nice Guessing!", "threshold": 5, "unlocked": false},
       {
         "title": "Woah, you're pretty good at this!",
         "threshold": 50,
@@ -47,7 +48,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
     switch (difficulty) {
       case 'Easy':
         return Colors.green.shade800;
-      case 'Normal':
+      case 'Hard':
         return Colors.orange.shade800;
       case 'Nightmare':
         return Colors.red.shade800;
@@ -59,33 +60,49 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAchievements();
+    _initializeAchievements();
   }
 
-  Future<void> _loadAchievements() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      achievements.forEach((category, achievementList) {
-        int guessedWords = prefs.getInt('${category}_guessedWords') ?? 0;
-        for (var achievement in achievementList) {
-          achievement["unlocked"] =
-              prefs.getBool('${category}_${achievement["title"]}') ??
-              (guessedWords >= achievement["threshold"]);
-        }
-      });
-    });
+  Future<void> _initializeAchievements() async {
+    await loadGuessedWords(); // Ensure guessed words are loaded
+    await _loadAchievementStates();
   }
 
-  Future<void> _saveAchievements() async {
+  Future<void> _loadAchievementStates() async {
     final prefs = await SharedPreferences.getInstance();
-    achievements.forEach((category, achievementList) {
+
+    // Process each category sequentially
+    for (var category in achievements.keys.toList()) {
+      final achievementList = achievements[category]!;
+      final guessedWordsCount = _getGuessedCountForCategory(category);
+
       for (var achievement in achievementList) {
-        prefs.setBool(
-          '${category}_${achievement["title"]}',
-          achievement["unlocked"],
-        );
+        final key = 'achv_${category}_${achievement["title"]}';
+        final previouslyUnlocked = prefs.getBool(key) ?? false;
+        final thresholdReached = guessedWordsCount >= achievement["threshold"];
+
+        achievement["unlocked"] = previouslyUnlocked || thresholdReached;
+
+        if (!previouslyUnlocked && thresholdReached) {
+          await prefs.setBool(key, true);
+        }
       }
-    });
+    }
+
+    if (mounted) setState(() {});
+  }
+
+  int _getGuessedCountForCategory(String category) {
+    switch (category) {
+      case 'Easy':
+        return easyGuessedWords.length;
+      case 'Hard':
+        return hardGuessedWords.length;
+      case 'Nightmare':
+        return nightmareGuessedWords.length;
+      default:
+        return 0;
+    }
   }
 
   @override
@@ -119,9 +136,12 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         child: ListView(
           padding: EdgeInsets.all(16.0),
           children:
-              achievements.entries.map((entry) {
-                return _buildAchievementCategory(entry.key, entry.value);
-              }).toList(),
+              achievements.entries
+                  .map(
+                    (entry) =>
+                        _buildAchievementCategory(entry.key, entry.value),
+                  )
+                  .toList(),
         ),
       ),
     );
@@ -155,80 +175,99 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             ),
           ),
           children:
-              achievementList.map((achievement) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
+              achievementList
+                  .map(
+                    (achievement) =>
+                        _buildAchievementItem(category, achievement),
+                  )
+                  .toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAchievementItem(
+    String category,
+    Map<String, dynamic> achievement,
+  ) {
+    final currentCount = _getGuessedCountForCategory(category);
+    final progress = currentCount / achievement["threshold"];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        color: Colors.grey[900]!.withOpacity(0.6),
+        child: ListTile(
+          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          leading: Icon(
+            achievement["unlocked"]
+                ? Icons.check_circle
+                : Icons.lock_outline_rounded,
+            color:
+                achievement["unlocked"]
+                    ? Colors.greenAccent.shade400
+                    : Colors.grey.shade400,
+            size: 32,
+          ),
+          title: Text(
+            achievement["title"],
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'LibreFranklin',
+            ),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value:
+                      achievement["unlocked"] ? 1.0 : progress.clamp(0.0, 1.0),
+                  backgroundColor: Colors.grey[800],
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    _getDifficultyColor(category),
                   ),
-                  child: Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    color: Colors.grey[900]!.withOpacity(0.6),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      leading: Icon(
-                        achievement["unlocked"]
-                            ? Icons.check_circle
-                            : Icons.lock_outline_rounded,
-                        color:
-                            achievement["unlocked"]
-                                ? Colors.greenAccent.shade400
-                                : Colors.grey.shade400,
-                        size: 32,
-                      ),
-                      title: Text(
-                        achievement["title"],
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'LibreFranklin',
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 8),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: achievement["unlocked"] ? 1.0 : 0.0,
-                              backgroundColor: Colors.grey[800],
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                _getDifficultyColor(category),
-                              ),
-                              minHeight: 8,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            "${achievement["threshold"]} Guessed",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                              fontFamily: 'LibreFranklin',
-                            ),
-                          ),
-                        ],
-                      ),
-                      trailing: Icon(
-                        Icons.emoji_events_rounded,
-                        color:
-                            achievement["unlocked"]
-                                ? Colors.amber.shade300
-                                : Colors.grey.shade600,
-                        size: 32,
-                      ),
+                  minHeight: 8,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                "${currentCount.clamp(0, achievement["threshold"])}/${achievement["threshold"]} Guessed",
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontFamily: 'LibreFranklin',
+                ),
+              ),
+              if (achievement["unlocked"])
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Text(
+                    "Achievement Unlocked!",
+                    style: TextStyle(
+                      color: Colors.greenAccent.shade400,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'LibreFranklin',
                     ),
                   ),
-                );
-              }).toList(),
+                ),
+            ],
+          ),
+          trailing: Icon(
+            Icons.emoji_events_rounded,
+            color:
+                achievement["unlocked"]
+                    ? Colors.amber.shade300
+                    : Colors.grey.shade600,
+            size: 32,
+          ),
         ),
       ),
     );
