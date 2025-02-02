@@ -13,26 +13,24 @@ class _GamePreferenceScreenState extends State<GamePreferenceScreen> {
   Color getBackgroundColor(double difficultyValue) {
     switch (difficultyValue.toInt()) {
       case 0:
-        return Colors.green.shade600; // Green for easy
+        return Colors.green.shade800; // Green for easy
       case 1:
-        return Colors.orange.shade600; // Orange for hard
+        return Colors.orange.shade800; // Orange for hard
       case 2:
-        return Colors.red.shade900; // Dark red for nightmare
+        return Colors.red.shade800; // Dark red for nightmare
       default:
-        return Colors
-            .green
-            .shade600; // Default to green if no difficulty selected
+        return Colors.green.shade800; // Default to green
     }
   }
 
   // Method to convert the slider value to the difficulty string
   String getDifficultyLabel(double value) {
     if (value == 0) {
-      return "Easy (5 letters)";
+      return "EASY (5 LETTERS)";
     } else if (value == 1) {
-      return "Hard (6 letters)";
+      return "HARD (6 LETTERS)";
     } else {
-      return "Nightmare (8 letters)";
+      return "NIGHTMARE (8 LETTERS)";
     }
   }
 
@@ -41,72 +39,107 @@ class _GamePreferenceScreenState extends State<GamePreferenceScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Lexiconic',
+          'LEXICONIC',
           style: TextStyle(
             fontFamily: 'LibreFranklin',
             fontSize: 32,
             letterSpacing: 3,
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.white,
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 23, 0, 31),
       ),
       body: Container(
-        color: getBackgroundColor(
-          _difficultyValue,
-        ), // Set background color based on difficulty
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Select Difficulty:",
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Colors.white,
-                  fontFamily: 'LibreFranklin',
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              SizedBox(height: 30),
-              Text(
-                getDifficultyLabel(_difficultyValue),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'LibreFranklin',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 3,
-                ),
-              ),
-              SizedBox(height: 20),
-              Slider(
-                value: _difficultyValue,
-                min: 0,
-                max: 2,
-                divisions: 2,
-                onChanged: (value) {
-                  setState(() {
-                    _difficultyValue = value;
-                  });
-                },
-                activeColor: Colors.white,
-                inactiveColor: Colors.white70,
-              ),
-              SizedBox(height: 40),
-              _buildStartButton(context),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              getBackgroundColor(_difficultyValue).withOpacity(0.9),
+              getBackgroundColor(_difficultyValue).withOpacity(0.7),
             ],
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "SELECT DIFFICULTY",
+                  style: TextStyle(
+                    fontSize: 28,
+                    color: Colors.white,
+                    fontFamily: 'LibreFranklin',
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+                SizedBox(height: 40),
+                Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        getDifficultyLabel(_difficultyValue),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'LibreFranklin',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: Colors.white,
+                          inactiveTrackColor: Colors.white70,
+                          thumbColor: Colors.white,
+                          overlayColor: Colors.white30,
+                          thumbShape: RoundSliderThumbShape(
+                            enabledThumbRadius: 12,
+                          ),
+                          overlayShape: RoundSliderOverlayShape(
+                            overlayRadius: 20,
+                          ),
+                          trackHeight: 6,
+                        ),
+                        child: Slider(
+                          value: _difficultyValue,
+                          min: 0,
+                          max: 2,
+                          divisions: 2,
+                          onChanged: (value) {
+                            setState(() {
+                              _difficultyValue = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 40),
+                _buildStartButton(context),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // Helper method to build the "Start Game" button with updated design
   Widget _buildStartButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+    return SizedBox(
+      width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
           String difficulty;
@@ -126,20 +159,22 @@ class _GamePreferenceScreenState extends State<GamePreferenceScreen> {
           );
         },
         style: ElevatedButton.styleFrom(
-          minimumSize: Size(double.infinity, 50),
-          backgroundColor: Colors.deepPurpleAccent, // Button background color
-          foregroundColor: Colors.white, // Text color
+          padding: EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: Colors.deepPurpleAccent,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16), // Rounded corners
+            borderRadius: BorderRadius.circular(16),
           ),
-          elevation: 8, // Shadow effect
+          elevation: 8,
+          shadowColor: Colors.black.withOpacity(0.3),
         ),
         child: Text(
-          "Start Game",
+          "START GAME",
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            fontFamily: 'LibreFranklin', // Apply custom font
+            fontFamily: 'LibreFranklin',
+            letterSpacing: 2,
           ),
         ),
       ),
